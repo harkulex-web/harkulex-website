@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harkulex E-commerce Site with Quote Workflow</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Load Inter font and custom styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Apply Inter font globally and set custom primary background */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #efe7de; 
+            scroll-behavior: smooth;
+        }
+        /* Custom scrollbar styling (Aesthetic) */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5b7aa4; 
+            border-radius: 4px;
+        }
+        /* Fade-in animation for products/content (Aesthetic) */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal specific styling */
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        /* --- CSS for the Brand Marquee Animation --- */
+        .marquee-container {
+            overflow: hidden;
+            width: 100%;
+            /* Gradient fade effect on the sides */
+            mask-image: linear-gradient(to right, 
+                transparent, 
+                black 5%, 
+                black 95%, 
+                transparent);
+        }
+
+        .marquee-track {
+            display: flex;
+            width: fit-content; /* Allows content to extend beyond container */
+            animation: scroll-left 50s linear infinite; /* Increased duration for smoother scroll */
+        }
+
+        .marquee-track:hover {
+            animation-play-state: paused; /* Pause on hover for easier viewing */
+        }
+        
+        /* Keyframes for continuous leftward scroll */
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); } /* Scrolls exactly one full copy of the brands */
+        }
+        
+
+
+/* TITLE */
+
+h1{
+text-align:center;
+margin-bottom:35px;
+}
+
+/* FILTERS */
+
+.filters{
+text-align:center;
+margin-bottom:30px;
+}
+
+.filters label{
+display:inline-block;
+padding:10px 18px;
+margin:6px;
+background:#e9edf3;
+border-radius:25px;
+cursor:pointer;
+font-size:14px;
+transition:.3s;
+}
+
+.filters label:hover{
+background:#007bff;
+color:white;
+}
+
+input{
+display:none;
+}
+
+/* GRID */
+
+.products{
+max-width:1200px;
+margin:auto;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:22px;
+}
+
+/* PRODUCT CARD */
+
+.product{
+background:white;
+border-radius:14px;
+padding:25px;
+text-align:center;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
+transition:.35s;
+}
+
+.product:hover{
+transform:translateY(-8px);
+box-shadow:0 14px 28px rgba(0,0,0,0.18);
+}
+
+.brand-slider{
+  overflow:hidden;
+  width:100%;
+  background:#f5f5f5;
+  padding:20px 0;
+}
+
+.brand-track{
+  display:flex;
+  width:max-content;
+  animation:scroll 20s linear infinite;
+}
+
+.brand-track img{
+  height:50px;
+  margin:0 40px;
+  object-fit:contain;
+}
+
+@keyframes scroll{
+  0%{
+    transform:translateX(0);
+  }
+  100%{
+    transform:translateX(-50%);
+  }
+}
+
+/* ICON */
+
+.icon{
+font-size:38px;
+display:block;
+margin-bottom:12px;
+animation:float 3s ease-in-out infinite;
+}
+
+@keyframes float{
+0%{transform:translateY(0)}
+50%{transform:translateY(-6px)}
+100%{transform:translateY(0)}
+}
+
+.product h3{
+font-size:16px;
+margin:8px 0;
+}
+
+/* LOAD MORE */
+
+.more{
+display:none;
+}
+
+#load:checked ~ .products .more{
+display:block;
+}
+
+/* BUTTON */
+
+.loadbtn{
+display:block;
+width:210px;
+margin:40px auto;
+text-align:center;
+background:#007bff;
+color:white;
+padding:13px;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+/* FILTER */
+
+#automation:checked ~ .products .product:not(.automation),
+#electrical:checked ~ .products .product:not(.electrical),
+#tools:checked ~ .products .product:not(.tools),
+#pneumatics:checked ~ .products .product:not(.pneumatics),
+#energy:checked ~ .products .product:not(.energy),
+#connectivity:checked ~ .products .product:not(.connectivity),
+#mechanical:checked ~ .products .product:not(.mechanical),
+#safety:checked ~ .products .product:not(.safety){
+display:none;
+}
+
+
+        .brand-logo {
+            flex-shrink: 0;
+            width: 150px; /* Fixed width for consistent spacing */
+            height: 80px;
+            margin-right: 40px; /* Space between logos */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 5px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 14px;
+            font-weight: 600;
+            color: #4e80c5;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive CTA Banner Style */
+        .cta-banner {
+            background-color: #c94444; /* A high-contrast color to draw attention */
+            color: white;
+        }
+    </style>
+    <script>
+        // Custom Tailwind Configuration for the specific color palette
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-bg': '#efe7de',
+                        'primary-blue': '#4e80c5', // Headings/CTAs
+                        'secondary-blue': '#5b7aa4', // Navigation
+                        'high-impact': '#c94444', // New contrast color for CTA banner
+                    },
+                    boxShadow: {
+                        'custom': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06)',
+                    }
+                }
+            }
+        }
+
+        // --- MOCK DATA ---
+        const mockProducts = [
+            { id: 1, name: "Precision Servo Motor Kit", category: "Industrial", description: "High-torque, low-latency servo for precision control systems. This kit includes all mounting hardware, an encoder, and a detailed setup guide for rapid deployment in automated assembly lines.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Servo+Kit" },
+            { id: 2, name: "Industrial-Grade PLC (16-I/O)", category: "Industrial", description: "Reliable programmable logic controller for factory automation. Features 16 digital inputs/outputs, Ethernet connectivity for remote monitoring, and supports multiple programming languages.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Industrial+PLC" },
+            { id: 3, name: "Digital Multimeter", category: "Electronics", description: "True RMS meter for accurate electrical troubleshooting. Measures voltage, current, resistance, capacitance, and temperature with high precision. Essential for every technician.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Multimeter" },
+            { id: 4, name: "High-Speed Cordless Drill", category: "Tools", description: "Heavy-duty 18V drill with superior battery life and adjustable torque settings. Designed for continuous professional use in demanding environments.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Cordless+Drill" },
+            { id: 5, name: "Laser Distance Measurer", category: "Tools", description: "Quick and accurate measurements for construction and planning up to 100 meters. Includes area, volume, and Pythagorean measurement functions.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Laser+Measurer" },
+            { id: 6, name: "SMD Capacitor Assortment Kit", category: "Electronics", description: "Comprehensive kit of surface-mount capacitors for prototyping. Contains 50 values ranging from 1pF to 10uF, neatly organized in a labeled plastic case.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Capacitor+Kit" },
+            { id: 7, name: "Heavy-Duty Safety Goggles", category: "Safety", description: "Anti-fog, scratch-resistant goggles for superior eye protection. Meets ANSI Z87.1 standards and fits comfortably over prescription glasses.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Safety+Goggles" },
+            { id: 8, name: "Industrial Ethernet Switch (8-Port)", category: "Industrial", description: "Rugged, unmanaged switch for reliable network connectivity in harsh environments. Features 8 fast Ethernet ports and DIN-rail mounting capability.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Ethernet+Switch" },
+            { id: 9, name: "Variable Frequency Drive (VFD)", category: "Industrial", description: "Controls AC motor speed and torque with high efficiency. Reduces energy consumption and motor wear. Rated for 5HP applications.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=VFD+Drive" },
+            { id: 10, name: "Soldering Station (Digital)", category: "Electronics", description: "Precision temperature control for delicate component work. Features a digital display, rapid heating, and sleep mode for safety and energy savings.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Soldering+Iron" },
+            { id: 11, name: "Impact Wrench (Pneumatic)", category: "Tools", description: "High-power wrench for automotive and heavy machinery repair. Delivers up to 1,200 ft-lbs of maximum torque in a lightweight, durable housing.", image: "https://placehold.co/400x300/4e80c5/ffffff?text=Impact+Wrench" },
+        ];
+        
+        // --- MINIMAL JAVASCRIPT FOR UI/UX ---
+
+        // State variables
+        let currentFilter = 'All';
+        let productsPerPage = 8;
+        let currentProductId = null; // Stores ID of product currently in detail view/quote request
+
+        /**
+         * Generates a mock inventory status string and color for a product.
+         * @returns {{status: string, color: string}}
+         */
+        const getMockInventoryStatus = () => {
+            const statuses = [
+                { status: "In Stock (50+ units)", color: "text-green-600" },
+                { status: "Low Stock (Est. 3-5 day lead time)", color: "text-yellow-600" },
+                { status: "Quote Required (Custom lead time)", color: "text-red-600" },
+            ];
+            // Randomly select a status for mock representation
+            return statuses[Math.floor(Math.random() * statuses.length)];
+        };
+
+
+        // Function to show any modal
+        const showModal = (modalId) => {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            // Add a small delay for opacity transition to take effect
+            setTimeout(() => modal.style.opacity = '1', 10); 
+            document.body.style.overflow = 'hidden'; // Prevent scrolling background
+        }
+
+        // Function to close any modal
+        const closeModal = (modalId) => {
+            const modal = document.getElementById(modalId);
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Restore scrolling background
+            }, 300); // Match transition duration
+        }
+
+        // Function to render a single product card
+        const renderProductCard = (product) => `
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden border border-gray-100 fade-in">
+                <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover object-center" 
+                    onerror="this.onerror=null; this.src='https://placehold.co/400x300/e0e7ff/333333?text=Image+Unavailable';" />
+                <div class="p-4">
+                    <span class="text-xs font-semibold text-secondary-blue uppercase">${product.category}</span>
+                    <h3 class="text-lg font-bold text-gray-800 mt-1 mb-2 truncate">${product.name}</h3>
+                    <!-- Display short description, which is the first 100 characters of the full description -->
+                    <p class="text-sm text-gray-500 h-10 overflow-hidden">${product.description.substring(0, 100)}...</p>
+                    <div class="mt-4">
+                        <!-- Updated button to call the new function with product ID -->
+                        <button onclick="showProductDetails(${product.id})" class="w-full px-4 py-2 text-sm font-semibold text-white bg-primary-blue rounded-lg hover:bg-opacity-90 transition duration-150 shadow-md">
+                            Details / Request Quote
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Function to render the product grid based on filter and count
+        const renderProductGrid = () => {
+            const grid = document.getElementById('product-grid');
+            const loadMoreButton = document.getElementById('load-more-btn');
+            const filteredProducts = currentFilter === 'All' 
+                ? mockProducts 
+                : mockProducts.filter(p => p.category === currentFilter);
+            
+            const productsToShow = filteredProducts.slice(0, productsPerPage);
+            grid.innerHTML = productsToShow.map(renderProductCard).join('');
+
+            // Recreate icons for dynamically generated content
+            lucide.createIcons();
+
+            // Update load more button visibility
+            if (productsPerPage >= filteredProducts.length) {
+                loadMoreButton.classList.add('hidden');
+            } else {
+                loadMoreButton.classList.remove('hidden');
+            }
+        };
+
+        // Event handler for filter buttons
+        const handleFilter = (filter) => {
+            currentFilter = filter;
+            productsPerPage = 8; // Reset view when filter changes
+            // Update active button state
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                const category = btn.getAttribute('data-category');
+                if (category === filter) {
+                    btn.classList.remove('bg-gray-200', 'text-gray-700');
+                    btn.classList.add('bg-primary-blue', 'text-white');
+                } else {
+                    btn.classList.remove('bg-primary-blue', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-700');
+                }
+            });
+            renderProductGrid();
+        };
+
+        // Event handler for load more button
+        const loadMore = () => {
+            productsPerPage += 4;
+            renderProductGrid();
+        };
+
+        // Minimal JS for mobile menu toggle
+        const toggleMenu = () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+            const openIcon = document.getElementById('menu-icon-open');
+            const closeIcon = document.getElementById('menu-icon-close');
+
+            if (menu.classList.contains('hidden')) {
+                openIcon.style.display = 'block';
+                closeIcon.style.display = 'none';
+            } else {
+                openIcon.style.display = 'none';
+                closeIcon.style.display = 'block';
+            }
+            lucide.createIcons(); // Ensure icons in the menu are rendered
+        };
+        
+        // --- MODAL WORKFLOW FUNCTIONS ---
+
+        // New function to show product details modal
+        const showProductDetails = (productId) => {
+            const product = mockProducts.find(p => p.id === productId);
+            if (!product) {
+                console.error('Product not found for ID:', productId);
+                return;
+            }
+
+            currentProductId = productId; // Store for the quote form
+            const inventory = getMockInventoryStatus(); // Get mock inventory status
+
+            // Populate the product details modal
+            document.getElementById('detail-product-name').textContent = product.name;
+            document.getElementById('detail-product-category').textContent = product.category;
+            document.getElementById('detail-product-description').textContent = product.description;
+            document.getElementById('detail-product-image').src = product.image;
+            document.getElementById('detail-product-image').alt = product.name;
+            
+            // Populate mock inventory status (NEW ENHANCEMENT)
+            const statusElement = document.getElementById('detail-inventory-status');
+            statusElement.textContent = inventory.status;
+            statusElement.className = `text-xl font-bold ${inventory.color}`;
+            
+            // Update the quote button inside the details modal to trigger the form modal
+            document.getElementById('detail-quote-btn').onclick = () => {
+                closeModal('product-detail-modal'); // Close detail modal first
+                showQuoteForm(productId, product.name); // Open form modal
+            };
+
+            showModal('product-detail-modal');
+        };
+
+        // New function to show the quote form modal
+        const showQuoteForm = (productId, productName) => {
+            // Optional: Set a hidden field in the form to track the product
+            document.getElementById('quote-product-id').value = productId || '';
+            
+            const formTitle = document.getElementById('quote-form-title');
+            if (productName) {
+                formTitle.textContent = `Request Quotation for: ${productName}`;
+                // Pre-fill the description with product context
+                document.getElementById('quote-description').value = `I am interested in ordering a bulk quantity of the ${productName}. Please provide a quotation and expected lead time for a custom volume.`;
+            } else {
+                formTitle.textContent = `General Quotation Request`;
+                document.getElementById('quote-description').value = '';
+            }
+
+            showModal('quote-form-modal');
+        };
+
+        // General Contact Form submission handler (Section #contact)
+        const handleContactSubmit = (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const messageBox = document.getElementById('form-message');
+            
+            // Mock success feedback
+            messageBox.textContent = 'Thank you! Your general inquiry has been successfully received. We will contact you shortly.';
+            messageBox.classList.remove('hidden', 'text-red-500');
+            messageBox.classList.add('text-green-600', 'fade-in');
+
+            // Clear the form after a delay
+            setTimeout(() => {
+                form.reset();
+                messageBox.classList.add('hidden');
+            }, 4000);
+        };
+        
+        // Quotation Form Submission Handler (Modal #quote-form-modal)
+        const handleQuoteSubmit = (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const messageBox = document.getElementById('quote-form-message');
+            
+            // Get form data for console logging (mock submission)
+            const data = {
+                company: document.getElementById('quote-company').value,
+                contactName: document.getElementById('quote-contact-name').value,
+                contactDetails: document.getElementById('quote-contact-details').value,
+                email: document.getElementById('quote-email').value,
+                description: document.getElementById('quote-description').value,
+                productId: document.getElementById('quote-product-id').value,
+            };
+            
+            console.log('Quote Request Submitted (Mock Data):', data);
+
+            // Mock success feedback
+            messageBox.textContent = 'Your quotation request has been successfully submitted! A sales representative will contact you within 24 hours.';
+            messageBox.classList.remove('hidden', 'text-red-500');
+            messageBox.classList.add('text-green-600', 'fade-in');
+
+            // Clear the form and close the modal after a delay
+            setTimeout(() => {
+                form.reset();
+                messageBox.classList.add('hidden');
+                closeModal('quote-form-modal');
+            }, 4000);
+        };
+
+
+        // Initialization: Run when the document is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the product grid display
+            renderProductGrid();
+
+            // Set up event listener for the general contact form
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', handleContactSubmit);
+            }
+            
+            // Set up event listener for the new quotation form
+            const quoteForm = document.getElementById('quote-form');
+            if (quoteForm) {
+                quoteForm.addEventListener('submit', handleQuoteSubmit);
+            }
+
+            // Set up event listeners for filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleFilter(btn.getAttribute('data-category')));
+            });
+
+            // Set up lucide icons
+            lucide.createIcons();
+        });
+
+    </script>
+</head>
+<body class="bg-primary-bg text-gray-800">
+
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-50 bg-secondary-blue shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo/Brand (UPDATED: Added a link to #top) -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="#top" class="cursor-pointer">
+                        <img src="headlogo3.png" alt="Harkulex Automations Official Logo" class="h-10 w-auto object-contain py-1" >
+
+                    </a>
+                </div>  
+
+                <!-- Desktop Menu -->
+                <div class="hidden sm:flex space-x-6 items-center">
+                    <a href="#categories" class="text-white hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition duration-150">Categories</a>
+                    <a href="#products" class="text-white hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition duration-150">Products</a>
+                    <a href="#services" class="text-white hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition duration-150">Services</a>
+                    <a href="#resources" class="text-white hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition duration-150">Resources</a>
+                    <a href="#brands" class="text-white hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition duration-150">Brands</a>
+                    <a href="#testimonials" class="text-white hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition duration-150">Testimonials</a>
+                    <a href="#contact" class="text-white hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition duration-150">Contact</a>
+                    <a href="#about" class="text-white hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition duration-150">Who We Are</a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="flex items-center sm:hidden">
+                    <button type="button" onclick="toggleMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-white hover:bg-primary-blue focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition duration-150" aria-controls="mobile-menu" aria-expanded="false">
+                        <!-- Menu Open Icon -->
+                        <i data-lucide="menu" id="menu-icon-open" class="block h-6 w-6"></i>
+                        <!-- Menu Close Icon -->
+                        <i data-lucide="x" id="menu-icon-close" class="hidden h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (ENHANCED with Icons) -->
+        <div class="sm:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="#categories" onclick="toggleMenu()" class="flex items-center space-x-2 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary-blue"><i data-lucide="layout-grid" class="w-5 h-5"></i><span>Categories</span></a>
+                <a href="#products" onclick="toggleMenu()" class="flex items-center space-x-2 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary-blue"><i data-lucide="boxes" class="w-5 h-5"></i><span>Products</span></a>
+                <a href="#services" onclick="toggleMenu()" class="flex items-center space-x-2 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary-blue"><i data-lucide="handshake" class="w-5 h-5"></i><span>Services</span></a>
+                <a href="#resources" onclick="toggleMenu()" class="flex items-center space-x-2 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary-blue"><i data-lucide="book-open" class="w-5 h-5"></i><span>Resources</span></a>
+                <a href="#brands" onclick="toggleMenu()" class="flex items-center space-x-2 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary-blue"><i data-lucide="tags" class="w-5 h-5"></i><span>Brands</span></a>
+                <a href="#testimonials" onclick="toggleMenu()" class="flex items-center space-x-2 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary-blue"><i data-lucide="message-square" class="w-5 h-5"></i><span>Testimonials</span></a>
+                <a href="#contact" onclick="toggleMenu()" class="flex items-center space-x-2 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary-blue"><i data-lucide="mail" class="w-5 h-5"></i><span>Contact</span></a>
+                <a href="#about" onclick="toggleMenu()" class="flex items-center space-x-2 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary-blue"><i data-lucide="users" class="w-5 h-5"></i><span>Who We Are</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section (Anchor for Home Button) -->
+    <header id="top" class="bg-primary-bg pt-16 pb-20 md:py-24" style="background-image: url('Mainback.jpg'); background-size: cover;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-primary-blue leading-tight mb-4 fade-in">
+                Automation & Innovation for Industry
+            </h1>
+            <p class="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto fade-in">
+                Your reliable partner for high-quality <b>Industrial Equipment</b>, <b>Power Tools</b>, and cutting-edge <b>Electronic Components</b>.
+                <br>
+                <span class="font-bold text-secondary-blue">We specialize in B2B supply but also welcome B2C customers.</span>
+            </p>
+            <a href="catalogue.pdf" target="_blank" class="inline-block px-8 py-3 text-lg font-semibold text-white bg-primary-blue rounded-lg shadow-custom hover:bg-opacity-90 transition duration-300 transform hover:scale-105 fade-in">
+                Explore Our Catalog
+            </a>
+        </div>
+    </header>
+
+    <!-- Categories Section -->
+    <section id="categories" class="py-16 bg-primary-blue bg-opacity-10" style="background-image: url('product.png'); background-size: cover;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-primary-blue mb-10">Our Core Product Categories</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Category Card 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform" >
+                    <video autoplay loop muted playsinline>
+  <source src="cata/robotic-arm.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2">Industrial Automation</h3>
+                    <p class="text-gray-600">PLCs, Sensors, Control Panels, VFDs, and Robotics components for efficient manufacturing.</p>
+                </div>
+                <!-- Category Card 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/voltmeter.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2">Power Tools & Handhelds</h3>
+                    <p class="text-gray-600">Drills, grinders, cutting tools, and specialized maintenance equipment from top brands.</p>
+                </div>
+                <!-- Category Card 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/sound-card.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2">Electronic Components</h3>
+                    <p class="text-gray-600">Circuit protection, passive components, semiconductors, and testing instruments.</p>
+                </div>
+                <!-- Category Card 4 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/labour.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2">Safety & Consumables</h3>
+                    <p class="text-gray-600">PPE, safety equipment, fasteners, lubricants, and high-quality industrial consumables.</p>
+                </div>
+                <!-- Category Card 5 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/crane.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2">Lifting Equipment & Material handling</h3>
+                    <p class="text-gray-600">Chain Pulley Block(CPB), Electric Hoists, Wire Ropes, Slings, Shackels, Hooks, Turnbuckles, Balancer, Web Slings</p>
+                </div>
+                <!-- Category Card 6 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/circuit-board.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2"> instrumention & process Control</h3>
+                    <p class="text-gray-600">pressure transmitters, temperature Sensor, flow meter, Level switch, Control valves, gas detectors</p>
+                </div>
+                <!-- Category Card 7 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/socket.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2">Panels systems & Switchboards</h3>
+                    <p class="text-gray-600">LT Panels, HT Panels, MCC Panels, PCC Panels, PLC Panels, Relay Panels, Panel enclosures</p>
+                </div>
+                <!-- Category Card 8 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/lifter.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2">Pneumatics & hydraulics</h3>
+                    <p class="text-gray-600">Cylendes valves, Tubes, Fittings, FRL units, vaccum Components, Air Preparation units</p>
+                </div>
+                <!-- Category Card 9 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/chatbot.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2"> Robotics & Motion Automation</h3>
+                    <p class="text-gray-600">Articulated robots, SCARA robots, Cartesion systems, Servo Drives, Vision drives, vision comera, controllers</p>
+                </div>
+                <!-- Category Card 10 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/electric-power.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2"> Energy, Power & Storage</h3>
+                    <p class="text-gray-600">batteries, power supply, UPS, Invertors, Solar panels, chargers, SMPS, generators</p>
+                </div>
+                <!-- Category Card 11 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                    <video autoplay loop muted playsinline>
+  <source src="cata/mechanic.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2">Mechanical & Motion systems</h3>
+                    <p class="text-gray-600">Bearings, Couplings, Gearboxes, belts, Pulleys, Motors, lubricants, power Transmission</p>
+                </div>
+                <!-- Category Card 12 -->
+                <div class="bg-white p-6 rounded-xl shadow-xl transition duration-300 hover:scale-[1.02] transform">
+                   <video autoplay loop muted playsinline>
+  <source src="cata/more-info.mp4" type="video/mp4">
+</video>
+                    <h3 class="text-xl font-semibold text-secondary-blue mb-2">Mail us For Custom Quote</h3>
+                    <br><br>
+                    <a href="mailto:harkulexautomations@gmail.com?subject=Enquiry"
+style="
+background:#3b6ea5;
+color:white;
+padding:14px 28px;
+font-size:18px;
+text-decoration:none;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+font-family:Arial;
+">
+Email Us
+</a>     
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="py-16">
+ 
+
+<h1>Harkulex Industrial Products</h1>
+
+<!-- FILTER INPUTS -->
+
+<input type="radio" name="filter" id="all" checked>
+<input type="radio" name="filter" id="automation">
+<input type="radio" name="filter" id="electrical">
+<input type="radio" name="filter" id="tools">
+<input type="radio" name="filter" id="pneumatics">
+<input type="radio" name="filter" id="energy">
+<input type="radio" name="filter" id="connectivity">
+<input type="radio" name="filter" id="mechanical">
+<input type="radio" name="filter" id="safety">
+
+<input type="checkbox" id="load">
+
+<!-- FILTER BUTTONS -->
+
+<div class="filters">
+
+<label for="all">All</label>
+<label for="automation">Automation</label>
+<label for="electrical">Electrical</label>
+<label for="tools">Tools</label>
+<label for="pneumatics">Pneumatics</label>
+<label for="energy">Energy</label>
+<label for="connectivity">Connectivity</label>
+<label for="mechanical">Mechanical</label>
+<label for="safety">Safety</label>
+
+</div>
+
+<div class="products">
+
+<!-- EXISTING PRODUCTS -->
+
+<div class="product automation"><span class="icon">⚙️</span><h3>PLC Controller</h3></div>
+<div class="product automation"><span class="icon">🖥️</span><h3>HMI Panel</h3></div>
+<div class="product automation"><span class="icon">📊</span><h3>SCADA System</h3></div>
+<div class="product automation"><span class="icon">🔄</span><h3>VFD Drive</h3></div>
+
+<div class="product electrical"><span class="icon">⚡</span><h3>MCB Breaker</h3></div>
+<div class="product electrical"><span class="icon">🔌</span><h3>MCCB Panel</h3></div>
+<div class="product electrical"><span class="icon">💡</span><h3>Industrial Lamp</h3></div>
+
+<div class="product tools"><span class="icon">🛠️</span><h3>Power Drill</h3></div>
+<div class="product tools"><span class="icon">🔧</span><h3>Hand Tool Set</h3></div>
+<div class="product tools"><span class="icon">🔥</span><h3>Welding Machine</h3></div>
+
+<!-- MORE PRODUCTS -->
+
+<div class="product pneumatics more"><span class="icon">💨</span><h3>Pneumatic Cylinder</h3></div>
+<div class="product pneumatics more"><span class="icon">🔩</span><h3>Air Valve</h3></div>
+<div class="product pneumatics more"><span class="icon">🧯</span><h3>FRL Unit</h3></div>
+
+<div class="product energy more"><span class="icon">🔋</span><h3>Industrial Battery</h3></div>
+<div class="product energy more"><span class="icon">🔌</span><h3>UPS System</h3></div>
+<div class="product energy more"><span class="icon">☀️</span><h3>Solar Panel</h3></div>
+
+<div class="product connectivity more"><span class="icon">🔗</span><h3>Cable Connector</h3></div>
+<div class="product connectivity more"><span class="icon">📦</span><h3>Junction Box</h3></div>
+
+<div class="product mechanical more"><span class="icon">⚙️</span><h3>Industrial Bearing</h3></div>
+<div class="product mechanical more"><span class="icon">🌀</span><h3>Gearbox</h3></div>
+
+<div class="product safety more"><span class="icon">⛑️</span><h3>Safety Helmet</h3></div>
+<div class="product safety more"><span class="icon">🧤</span><h3>Industrial Gloves</h3></div>
+
+<!-- EXTRA 10 PRODUCTS -->
+
+<div class="product automation more"><span class="icon">📡</span><h3>Industrial Sensor</h3></div>
+<div class="product automation more"><span class="icon">🎛️</span><h3>Servo Drive</h3></div>
+<div class="product electrical more"><span class="icon">🔋</span><h3>Transformer</h3></div>
+<div class="product electrical more"><span class="icon">🧵</span><h3>Industrial Cable</h3></div>
+<div class="product tools more"><span class="icon">🪚</span><h3>Cutting Tool</h3></div>
+<div class="product tools more"><span class="icon">📏</span><h3>Digital Caliper</h3></div>
+<div class="product mechanical more"><span class="icon">🛞</span><h3>Pulley</h3></div>
+<div class="product mechanical more"><span class="icon">🔗</span><h3>Chain Drive</h3></div>
+<div class="product safety more"><span class="icon">🦺</span><h3>Safety Jacket</h3></div>
+<div class="product safety more"><span class="icon">🧴</span><h3>Industrial Cleaner</h3></div>
+
+</div>
+
+<label for="load" class="loadbtn">Load More Products</label>
+
+    </section>
+
+<div class="brand-slider py-16 bg-primary-blue">
+    <h2 class="text-3xl font-bold text-center text-white mb-8">Authorised Dealers & Leading Brands We Supply</h2>
+  <div class="brand-track">
+
+    <img src="brand/Bosch.png">
+    <img src="brand/mak.png">
+    <img src="brand/Dewalt.png">
+    <img src="brand/Stanley.png">
+    <img src="brand/3M.jpg">
+    <img src="brand/HONEY.jpg">
+    <img src="brand/smn.png">
+    <img src="brand/abb.png">
+    <img src="brand/schneider.png">
+    <img src="brand/LEG.jpg">
+    <img src="brand/MIT.png">
+    <img src="brand/OMRON.jpg">
+    <img src="brand/DELTA.png">
+    <img src="brand/rock.webp">
+    <img src="brand/YAS.png">
+    <img src="brand/SICK.png">
+    <img src="brand/Key.png">
+    <img src="brand/PF.png">
+    <img src="brand/EXIDE.jpg">
+    <img src="brand/FESTO.jpg">
+    <img src="brand/BAL.png">
+    <img src="brand/smc.png">
+    <img src="brand/park.jpg">
+    <img src="brand/poly.png">
+    <img src="brand/hav.png">
+    <img src="brand/lapp.png">
+    <img src="brand/skf.png">
+    <img src="brand/nsk.png">
+    <img src="brand/sew.png">
+    <img src="brand/pc.png">
+    <img src="brand/Rittal.png">
+
+    <!-- duplicate for infinite loop -->
+
+    <img src="brand/Bosch.png">
+    <img src="brand/mak.png">
+    <img src="brand/Dewalt.png">
+    <img src="brand/Stanley.png">
+    <img src="brand/3M.jpg">
+    <img src="brand/HONEY.jpg">
+    <img src="brand/smn.png">
+    <img src="brand/abb.png">
+    <img src="brand/schneider.png">
+    <img src="brand/LEG.jpg">
+    <img src="brand/MIT.png">
+    <img src="brand/OMRON.jpg">
+    <img src="brand/DELTA.png">
+    <img src="brand/rock.webp">
+    <img src="brand/YAS.png">
+    <img src="brand/SICK.png">
+    <img src="brand/Key.png">
+    <img src="brand/PF.png">
+    <img src="brand/EXIDE.jpg">
+    <img src="brand/FESTO.jpg">
+    <img src="brand/BAL.png">
+    <img src="brand/smc.png">
+    <img src="brand/park.jpg">
+    <img src="brand/poly.png">
+    <img src="brand/hav.png">
+    <img src="brand/lapp.png">
+    <img src="brand/skf.png">
+    <img src="brand/nsk.png">
+    <img src="brand/sew.png">
+    <img src="brand/pc.png">
+    <img src="brand/Rittal.png">
+
+
+  </div>
+</div>
+
+
+    
+    <!-- Services / Value Proposition Section -->
+    <section id="services" class="py-16 bg-primary-bg" style="background-image: url('abc.jpg'); background-size: cover; ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-primary-blue mb-10">Why Choose Harkulex?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <!-- Feature 1 -->
+                <div class="p-6 bg-white rounded-xl shadow-xl border-t-4 border-primary-blue">
+                    <i data-lucide="badge-check" class="w-10 h-10 text-primary-blue mx-auto mb-3"></i>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Unmatched Quality</h3>
+                    <p class="text-gray-600 text-sm">We source only reliable, certified products to ensure peak performance and longevity for your projects.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="p-6 bg-white rounded-xl shadow-xl border-t-4 border-primary-blue">
+                    <i data-lucide="handshake" class="w-10 h-10 text-primary-blue mx-auto mb-3"></i>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Dedicated Support</h3>
+                    <p class="text-gray-600 text-sm">Expert advice and technical support available to help you select and implement the right solution.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="p-6 bg-white rounded-xl shadow-xl border-t-4 border-primary-blue">
+                    <i data-lucide="truck" class="w-10 h-10 text-primary-blue mx-auto mb-3"></i>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Efficient Supply Chain</h3>
+                    <p class="text-gray-600 text-sm">Streamlined logistics focused on quick and dependable delivery across all major regions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: Technical Resources / Downloads -->
+    <section id="resources" class="py-16 bg-primary-blue bg-opacity-10" style="background-image: url('product.png'); background-size: cover; ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-secondary-blue mb-8">Technical Resources & Downloads</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Access essential documentation, guides, and specifications to support your planning and implementation needs.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Resource 1 -->
+                <a href="#" class="block p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 border-l-4 border-primary-blue flex items-center space-x-3">
+                    <i data-lucide="file-text" class="w-6 h-6 text-primary-blue flex-shrink-0"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Full 2024 Product Catalog (PDF)</h3>
+                        <p class="text-sm text-gray-500">Download our comprehensive list of available stock.</p>
+                    </div>
+                </a>
+               
+                <!-- Resource 3 -->
+                <a href="#" class="block p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 border-l-4 border-primary-blue flex items-center space-x-3">
+                    <i data-lucide="database" class="w-6 h-6 text-primary-blue flex-shrink-0"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Brands we  Deal</h3>
+                        <p class="text-sm text-gray-500">Download All Brands Lists which we deal</p>
+                    </div>
+                </a>
+                 <!-- Resource 2 -->
+                <a href="#" class="block p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 border-l-4 border-primary-blue flex items-center space-x-3">
+                    <i data-lucide="settings-2" class="w-6 h-6 text-primary-blue flex-shrink-0"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Conatct Details & terms & Conditions</h3>
+                        <p class="text-sm text-gray-500">click here to see Terms & Conditions or contact Details</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-16 bg-white" style="background-image: url('anu.jpg'); background-size: cover; ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-secondary-blue mb-10">Trusted by Industry Professionals</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Testimonial 1 -->
+                <div class="p-6 bg-primary-bg rounded-xl shadow-lg border-l-4 border-primary-blue">
+                    <p class="italic text-gray-700 mb-4">"The PLC units arrived on time and integration was flawless. Harkulex is now our go-to for industrial components."</p>
+                    <p class="font-semibold text-sm text-primary-blue">- Anil Sharma, Manufacturing Head</p>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="p-6 bg-primary-bg rounded-xl shadow-lg border-l-4 border-primary-blue">
+                    <p class="italic text-gray-700 mb-4">"Excellent quality tools at competitive prices. The customer support helped us find the right equipment for our maintenance team."</p>
+                    <p class="font-semibold text-sm text-primary-blue">- Deepak Rao, Engineering Services</p>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="p-6 bg-primary-bg rounded-xl shadow-lg border-l-4 border-primary-blue">
+                    <p class="italic text-gray-700 mb-4">"Great selection of electronic components. Perfect for rapid prototyping without compromising on component quality."</p>
+                    <p class="font-semibold text-sm text-primary-blue">- Pooja Singh, R&D Engineer</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    
+
+    <!-- Contact Section (General Inquiry Form) -->
+    <section id="contact" class="py-16 bg-primary-blue bg-opacity-20" style="background-image: url('contact.jpg'); background-size: cover; ">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-primary-blue mb-8">Get in Touch (General Inquiry)</h2>
+            <p class="text-center text-lg text-gray-600 mb-6">For general questions or partnership inquiries, please use the form below.</p>
+
+            <!-- Form Submission Handled by Minimal JS (Prevents Page Reload) -->
+            <form id="contact-form" action="https://formsubmit.co/harkulexautomations@gmail.com" method="POST" class="bg-white p-8 rounded-xl shadow-2xl border-t-4 border-primary-blue" >
+                <div class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" name="name" id="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-blue focus:border-primary-blue" required>
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                        <input type="tel" name="phone" id="phone" placeholder="+1 (555) 000-0000" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-blue focus:border-primary-blue">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Work Email</label>
+                        <input type="email" name="email" id="email" placeholder="Abc@gmail.com " class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-blue focus:border-primary-blue" required>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700">Your Inquiry</label>
+                        <textarea name="message" id="message" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-blue focus:border-primary-blue" required></textarea>
+                    </div>
+                    <button type="submit" class="w-full px-4 py-2 text-lg font-semibold text-white bg-primary-blue rounded-lg shadow-md hover:bg-opacity-90 transition duration-150">
+                        Send Inquiry
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Message Box (Controlled by Minimal JS) -->
+            <p id="form-message" class="hidden mt-4 text-center font-semibold"></p>
+        </div>
+    </section>
+    
+    <!-- NEW SECTION: High-Impact CTA Banner -->
+    <section id="cta-banner" class="cta-banner py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+            <h2 class="text-3xl font-extrabold mb-4 md:mb-0">
+                Ready to streamline your industrial supply chain?
+            </h2>
+            <button onclick="showQuoteForm()" class="px-8 py-3 text-lg font-bold text-high-impact bg-white rounded-lg shadow-xl hover:bg-gray-100 transition duration-300 transform hover:scale-105">
+                Get Your Custom Quote Today
+            </button>
+        </div>
+    </section>
+
+
+    <!-- Who We Are Section -->
+    <section id="about" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center text-primary-blue mb-10">Who We Are: About Harkulex</h2>
+        
+        <div class="md:grid md:grid-cols-2 md:gap-12 items-center">
+            
+            <div class="mb-8 md:mb-0">
+                <p class="text-lg text-gray-600 mb-4">
+                    Harkulex Automations is a multi-category industrial solutions and supply company specializing in automation, electrical systems, mechanical components, energy products, tools, and complete industrial procurement support.
+                    We are not limited to industrial automation alone — we provide a comprehensive range of industrial products and supply chain solutions across multiple sectors.
+                </p>
+                <p class="text-lg text-gray-600">
+                    Our mission is simple: To connect industries with reliable products, trusted brands, and structured supply solutions — efficiently and professionally.
+                </p>
+            </div> 
+
+            <div class="flex justify-center">
+                <img src="men2.jpeg" alt="Industrial automation at Harkulex" class="rounded-lg shadow-xl w-full h-auto">
+            </div>
+
+        </div> </div>
+</section>
+
+    <!-- Footer -->
+    <footer class="bg-secondary-blue mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white text-center sm:text-left">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+                
+                <!-- Column 1: Brand Info -->
+                <div class="col-span-2 md:col-span-1">
+                    <h4 class="text-lg font-bold mb-3 text-white">Harkulex</h4>
+                    <p class="text-sm">Innovating supply chain for the future of automation and power solutions.</p>
+                    <img src="logo.png" alt="Company logo" >
+
+                </div>
+
+                <!-- Column 2: Quick Links -->
+                <div>
+                    <h4 class="text-lg font-bold mb-3">Quick Links</h4>
+                    <ul class="space-y-1 text-sm">
+                        <li><a href="#categories" class="hover:text-primary-blue transition duration-150">Categories</a></li>
+                        <li><a href="#products" class="hover:text-primary-blue transition duration-150">Catalog</a></li>
+                        <li><a href="#services" class="hover:text-primary-blue transition duration-150">Value Props</a></li>
+                        <li><a href="#resources" class="hover:text-primary-blue transition duration-150">Resources</a></li>
+                        <li><a href="#brands" class="hover:text-primary-blue transition duration-150">Brands</a></li>
+                        <li><a href="#testimonials" class="hover:text-primary-blue transition duration-150">Testimonials</a></li>
+                        <li><a href="#contact" class="hover:text-primary-blue transition duration-150">Contact</a></li>
+                        <li><a href="#about" class="hover:text-primary-blue transition duration-150">Who We Are</a></li>
+                        <!-- Link opens modal -->
+                        <li><a href="#" onclick="showModal('terms-modal'); return false;" class="hover:text-primary-blue transition duration-150">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Contact Details -->
+                <div>
+                    <h4 class="text-lg font-bold mb-3">Contact Info</h4>
+                    <p class="text-sm">Sales: <a href="mailto:Enquiry@Harkulex.in" class="hover:text-primary-blue">Enquiry@Harkulex.in</a></p>
+                    <p class="text-sm">Support: <a href="mailto:Support@Harkulex.in" class="hover:text-primary-blue">Admin@Harkulex.in</a></p>
+                    <p class="text-sm">Phone: +91 8585908471</p>
+                </div>
+                
+                <!-- Column 4: Location Details -->
+                <div class="col-span-2 md:col-span-1">
+                    <h4 class="text-lg font-bold mb-3">Office Locations</h4>
+                    <p class="text-sm">Main Office: Plot no 10, Khair Road, Aligarh UP (202001)</p>
+                    <p class="text-sm mt-1">Working Office: 1A Geeta Colony, Delhi (110051)</p>
+                </div>
+
+                <!-- Column 5: Social Media -->
+                <div>
+                    <h4 class="text-lg font-bold mb-3">Connect</h4>
+                    <div class="flex space-x-4 justify-center sm:justify-start">
+                        <!-- LinkedIn -->
+                        <a href="#" aria-label="LinkedIn" class="hover:text-primary-blue transition duration-150">
+                            <i data-lucide="linkedin" class="w-6 h-6"></i>
+                        </a>
+                        <!-- Instagram -->
+                        <a href="#" aria-label="Instagram" class="hover:text-primary-blue transition duration-150">
+                            <i data-lucide="instagram" class="w-6 h-6"></i>
+                        </a>
+                        <!-- Twitter/X -->
+                        <a href="#" aria-label="Twitter/X" class="hover:text-primary-blue transition duration-150">
+                            <i data-lucide="twitter" class="w-6 h-6"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-4 border-t border-primary-blue text-center text-xs">
+                &copy; 2024 Harkulex Automations. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- MODAL 1: Product Detail View (Triggers the Quote Form) -->
+    <div id="product-detail-modal" class="modal fixed inset-0 z-50 hidden bg-black bg-opacity-75 flex items-center justify-center p-4" style="opacity: 0;">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-secondary-blue text-white p-4 rounded-t-xl flex justify-between items-center shadow-lg">
+                <h3 id="detail-product-name" class="text-xl font-bold">Product Name Placeholder</h3>
+                <button onclick="closeModal('product-detail-modal')" class="text-white hover:text-primary-bg transition duration-150">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Product Content) -->
+            <div class="p-6 text-gray-700 space-y-4">
+                <img id="detail-product-image" src="https://placehold.co/400x300/e0e7ff/333333?text=Loading..." alt="Product Image" class="w-full h-auto object-cover rounded-lg mb-4">
+                
+                <p class="flex justify-between items-center border-b pb-2">
+                    <span class="font-semibold text-secondary-blue">Category:</span> 
+                    <span id="detail-product-category" class="text-gray-700 font-medium"></span>
+                </p>
+                
+                <!-- NEW: Inventory Status Mock -->
+                <p class="flex justify-between items-center border-b pb-2">
+                    <span class="font-semibold text-secondary-blue">Inventory Status:</span> 
+                    <span id="detail-inventory-status" class="text-xl font-bold text-gray-700">Loading...</span>
+                </p>
+
+                <h4 class="text-lg font-bold text-primary-blue mt-4">Full Description</h4>
+                <p id="detail-product-description" class="text-sm leading-relaxed"></p>
+
+                <div class="mt-8 pt-4 border-t border-gray-200 text-center">
+                    <button id="detail-quote-btn" class="w-full px-6 py-3 text-lg font-semibold text-white bg-primary-blue rounded-lg hover:bg-opacity-90 transition duration-150 shadow-md">
+                        Request For Quotation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL 2: Quotation Request Form -->
+    <div id="quote-form-modal" class="modal fixed inset-0 z-50 hidden bg-black bg-opacity-75 flex items-center justify-center p-4" style="opacity: 0;">
+        <div class="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-primary-blue text-white p-4 rounded-t-xl flex justify-between items-center shadow-lg">
+                <h3 id="quote-form-title" class="text-xl font-bold">Quotation Request</h3>
+                <button onclick="closeModal('quote-form-modal')" class="text-white hover:text-primary-bg transition duration-150">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Form Content) -->
+            <form id="quote-form" class="p-6 text-gray-700 space-y-4">
+                <!-- Hidden input to track the product ID requesting a quote for -->
+                <input type="hidden" id="quote-product-id" name="productId"> 
+
+                <div>
+                    <label for="quote-company" class="block text-sm font-medium text-gray-700">Company Name</label>
+                    <input type="text" id="quote-company" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-secondary-blue focus:border-secondary-blue" required>
+                </div>
+                
+                <div>
+                    <label for="quote-contact-name" class="block text-sm font-medium text-gray-700">Contact Person Name</label>
+                    <input type="text" id="quote-contact-name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-secondary-blue focus:border-secondary-blue" required>
+                </div>
+                
+                <div>
+                    <label for="quote-contact-details" class="block text-sm font-medium text-gray-700">Contact Phone Number</label>
+                    <input type="tel" id="quote-contact-details" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-secondary-blue focus:border-secondary-blue" required>
+                </div>
+                
+                <div>
+                    <label for="quote-email" class="block text-sm font-medium text-gray-700">Contact Email ID</label>
+                    <input type="email" id="quote-email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-secondary-blue focus:border-secondary-blue" required>
+                </div>
+                
+                <div>
+                    <label for="quote-description" class="block text-sm font-medium text-gray-700">Detailed Requirement (Quantity, Specific Needs, etc.)</label>
+                    <textarea id="quote-description" rows="5" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-secondary-blue focus:border-secondary-blue" required></textarea>
+                </div>
+                
+                <button type="submit" class="w-full px-4 py-3 text-lg font-semibold text-white bg-secondary-blue rounded-lg shadow-md hover:bg-opacity-90 transition duration-150">
+                    Submit Quotation Request
+                </button>
+                
+                <!-- Message Box (Controlled by Minimal JS) -->
+                <p id="quote-form-message" class="hidden mt-4 text-center font-semibold"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- T&C Modal (Existing) -->
+    <div id="terms-modal" class="modal fixed inset-0 z-50 hidden bg-black bg-opacity-75 flex items-center justify-center p-4" style="opacity: 0;">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-primary-blue text-white p-4 rounded-t-xl flex justify-between items-center shadow-lg">
+                <h3 class="text-xl font-bold">Terms and Conditions of Use</h3>
+                <button onclick="closeModal('terms-modal')" class="text-white hover:text-primary-bg transition duration-150">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Terms Content) -->
+            <div class="p-6 text-gray-700 space-y-4">
+                <p class="text-sm text-gray-500">Last Updated: October 2024</p>
+                
+                <h4 class="text-lg font-bold text-primary-blue mt-4">1. Acceptance of Terms</h4>
+                <p class="text-sm">By accessing or using the Harkulex Automations website (the "Site") or requesting a quote/placing an order, you agree to be bound by these Terms and Conditions ("Terms"). These Terms apply to all visitors, users, and others who access or use the Site.</p>
+
+                <h4 class="text-lg font-bold text-primary-blue mt-4">2. Product Information and Quotes</h4>
+                <ul class="list-disc list-inside space-y-1 text-sm pl-4">
+                    <li>**Product Accuracy:** While we strive for accuracy, the images, descriptions, and specifications on the Site are for informational purposes only. We do not warrant that product descriptions or other content is complete, reliable, current, or error-free.</li>
+                    <li>**Pricing and Availability:** Given the nature of industrial supply, **all prices displayed are subject to change without notice.** Final, binding prices will only be confirmed in a formal, written quote provided by a Harkulex representative, which is typically valid for 15 days.</li>
+                    <li>**Order Process:** Our site operates on a **Quote Request Model**. Clicking "Details / Request Quote" does not constitute an order but is an inquiry. No order is finalized until confirmed by a purchase order and written acknowledgment from Harkulex.</li>
+                </ul>
+                
+                <h4 class="text-lg font-bold text-primary-blue mt-4">3. Delivery, Title, and Risk</h4>
+                <ul class="list-disc list-inside space-y-1 text-sm pl-4">
+                    <li>**Delivery Timelines:** Any delivery dates provided are estimates only. Harkulex is not liable for delays in shipment.</li>
+                    <li>**Risk of Loss (B2B):** For commercial transactions, the title and **risk of loss** for all products pass to you upon shipment from our warehouse or designated point of dispatch (F.O.B. shipping point).</li>
+                </ul>
+                
+                <h4 class="text-lg font-bold text-primary-blue mt-4">4. Limitation of Liability</h4>
+                <p class="text-sm">Harkulex Automations and its founders shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of the Site or products purchased.</p>
+
+                <h4 class="text-lg font-bold text-primary-blue mt-4">5. Governing Law</h4>
+                <p class="text-sm">These Terms shall be governed and construed in accordance with the laws of India, without regard to its conflict of law provisions.</p>
+                
+                <div class="mt-8 pt-4 border-t border-gray-200 text-center">
+                    <button onclick="closeModal('terms-modal')" class="px-6 py-2 text-sm font-semibold text-white bg-secondary-blue rounded-lg hover:bg-opacity-90 transition duration-150">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+<a href="https://wa.me/918585908471?text=Hello%20Harkulex%20Automations!%20I'm%20interested%20in%20your%20industrial%20solutions." 
+   target="_blank" 
+   style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: flex; align-items: center; text-decoration: none; font-family: Arial, sans-serif;">
+
+    <div style="background-color: white; color: #333; padding: 8px 15px; border-radius: 20px; margin-right: 12px; box-shadow: 0px 4px 10px rgba(0,0,0,0.1); font-size: 14px; font-weight: bold; border: 1px solid #eee;">
+        Chat with Harkulex
+    </div>
+
+    <div style="width: 60px; height: 60px; background-color: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0px 4px 15px rgba(0,0,0,0.2);">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" 
+             alt="WhatsApp" 
+             style="width: 34px; height: 34px;">
+    </div>
+</a>
+</body>
+</html>
