@@ -1028,16 +1028,85 @@ Email Us
 
     
     <!-- NEW SECTION: High-Impact CTA Banner -->
-    <section id="cta-banner" class="cta-banner py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-            <h2 class="text-3xl font-extrabold mb-4 md:mb-0">
-                Ready to streamline your industrial supply chain?
-            </h2>
-            <button onclick="showQuoteForm()" class="px-8 py-3 text-lg font-bold text-high-impact bg-white rounded-lg shadow-xl hover:bg-gray-100 transition duration-300 transform hover:scale-105">
-                Get Your Custom Quote Today
-            </button>
+   <section style="background-color: #cc4444; padding: 50px 20px; border-radius: 12px; margin: 40px 0; text-align: center;">
+    <div style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+        <div style="text-align: left;">
+            <h2 style="color: white; font-size: 32px; font-weight: 800; margin: 0;">Ready to streamline your industrial supply chain?</h2>
+            <p style="color: #ffeaea; margin-top: 8px; font-size: 18px;">Get specialized pricing for your bulk requirements.</p>
         </div>
-    </section>
+        <button onclick="toggleQuoteModal()" style="background-color: white; color: #cc4444; font-weight: bold; padding: 18px 35px; border-radius: 15px; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 10px 15px rgba(0,0,0,0.1);">
+            Get Your Custom Quote Today
+        </button>
+    </div>
+</section>
+
+<div id="quoteModal" style="display: none; position: fixed; inset: 0; z-index: 9999; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px;">
+    
+    <div style="background-color: white; width: 100%; max-width: 700px; border-radius: 24px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.2); overflow: hidden;">
+        
+        <button onclick="toggleQuoteModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 30px; color: #999; cursor: pointer;">&times;</button>
+        
+        <div style="padding: 40px; max-height: 90vh; overflow-y: auto;">
+            <h3 style="font-size: 28px; font-weight: bold; color: #1a202c; margin-bottom: 10px;">Request a Custom Quote</h3>
+            <p style="color: #718096; margin-bottom: 30px;">Please provide your contact and product details below.</p>
+
+            <form id="quote-form" action="https://formsubmit.co/enquiry@harkulex.in" method="POST" enctype="multipart/form-data">
+                
+                <input type="hidden" name="_subject" value="URGENT: New Custom Quote Request">
+                <input type="hidden" name="_captcha" value="false">
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: bold; color: #4a5568; text-transform: uppercase; margin-bottom: 5px;">Full Name *</label>
+                        <input type="text" name="name" placeholder="Enter Full Name" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; display: block;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: bold; color: #4a5568; text-transform: uppercase; margin-bottom: 5px;">Mobile Number *</label>
+                        <input type="tel" name="phone" placeholder="Mobile No." required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; display: block;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: bold; color: #4a5568; text-transform: uppercase; margin-bottom: 5px;">Email Address *</label>
+                        <input type="email" name="email" placeholder="Email" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; display: block;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <input type="text" name="company" placeholder="Company Name" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none;">
+                    
+                    <select name="category" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; cursor: pointer;">
+                        <option value="" disabled selected>Select Product Category</option>
+                        <option>Industrial Automation</option>
+                        <option>Power Tools & Handhelds</option>
+                        <option>Electronic & Consumables</option>
+                        <option>Lifting Equipment & Material</option>
+                        <option>Instrumentation & Process Control</option>
+                        <option>Others</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <input type="text" name="model" placeholder="Product Name / Model" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none;">
+                    <input type="number" name="qty" placeholder="Quantity" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none;">
+                </div>
+
+                <textarea name="specs" rows="3" placeholder="Technical Specifications (if any)" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; margin-bottom: 15px; font-family: inherit; resize: vertical;"></textarea>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-size: 12px; font-weight: bold; color: #a0aec0; text-transform: uppercase; margin-bottom: 5px;">Attach BOM/File (Optional)</label>
+                    <input type="file" name="attachment" style="font-size: 14px; color: #718096;">
+                </div>
+
+                <button type="submit" id="quote-btn" style="width: 100%; padding: 18px; background-color: #cc4444; color: white; font-weight: bold; font-size: 18px; border: none; border-radius: 12px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 6px rgba(204, 68, 68, 0.2);">
+                    Submit Quotation Request
+                </button>
+            </form>
+            
+            <div id="quote-success" style="display: none; margin-top: 20px; padding: 20px; background-color: #f0fff4; border: 1px solid #c6f6d5; color: #2f855a; border-radius: 12px; text-align: center; font-weight: bold;">
+                ✅ Quotation submitted! Our team will connect you soon.
+            </div>
+        </div>
+    </div>
+</div>
 
 
     <!-- Who We Are Section -->
@@ -1332,6 +1401,45 @@ document.getElementById("contact-form").onsubmit = function(e) {
         alert("Network error. Please try again.");
         btn.disabled = false;
         btn.innerHTML = "Send Inquiry";
+    });
+};
+    function toggleQuoteModal() {
+    const modal = document.getElementById('quoteModal');
+    if (modal.style.display === "none" || modal.style.display === "") {
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+    } else {
+        modal.style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+}
+
+document.getElementById("quote-form").onsubmit = function(e) {
+    e.preventDefault();
+    const btn = document.getElementById("quote-btn");
+    const msg = document.getElementById("quote-success");
+    const formData = new FormData(this);
+
+    btn.innerText = "Processing...";
+    btn.disabled = true;
+
+    fetch(this.action, {
+        method: "POST",
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(response => {
+        if (response.ok) {
+            msg.style.display = "block";
+            this.style.display = "none";
+            btn.innerText = "Submitted!";
+            setTimeout(toggleQuoteModal, 3000);
+        }
+    })
+    .catch(error => {
+        alert("Something went wrong. Please try again.");
+        btn.disabled = false;
+        btn.innerText = "Submit Quotation Request";
     });
 };
 </script>
